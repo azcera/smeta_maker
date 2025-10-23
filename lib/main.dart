@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smeta_maker/data/app_constants.dart';
@@ -18,6 +19,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
+    await FlutterDownloader.initialize(debug: true);
     final prefs = await SharedPreferences.getInstance();
     await ProjectManager.create();
     if (prefs.getString(AppConstants.lastCategoryKey) == null) {

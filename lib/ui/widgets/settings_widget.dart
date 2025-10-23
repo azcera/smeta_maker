@@ -24,7 +24,9 @@ class _SettingsWidgetState extends State<SettingsWidget> {
     WidgetsBinding.instance.addPostFrameCallback(
       (_) => setState(() {
         version = packageInfo.version;
-        version = '$version (${packageInfo.buildNumber})';
+        version = packageInfo.buildNumber.isNotEmpty
+            ? '$version (${packageInfo.buildNumber})'
+            : version;
       }),
     );
   }

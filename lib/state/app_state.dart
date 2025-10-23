@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:smeta_maker/data/app_constants.dart';
@@ -104,20 +106,34 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Update check method
   Future<Map<String, dynamic>?> checkupdates() async {
     try {
       final result = await UpdateService.checkForUpdates();
       print(result);
       String title;
       List<FilledButton> buttons;
-      String content;
+      String content = '';
       if (result != null && result[AppConstants.updateAvailableKey]) {
         final latest = result[AppConstants.latestVersionKey];
         final url = result[AppConstants.downloadUrlKey];
-        title = latest;
-        buttons = [FilledButton(onPressed: () {}, child: Text('Обновить'))];
-        content = url;
+        title = 'Доступна версия $latest';
+        void Function() onPressed = () {};
+
+        if (Platform.isAndroid) {
+          content =
+              'При нажатии кнопки "обновить" приложение автоматически скачает новую версию и установит ее на устройство.';
+          onPressed = () async {
+            await UpdateService.downloadAndInstallApk(url);
+          };
+        }
+        if (Platform.isWindows) {
+          content =
+              'При нажатии кнопки "обновить" у вас автоматически начнется скачивание новой версии и ее установка. Приложение перезапустится';
+          onPressed = () async {
+            await UpdateService.downloadAndRunInstaller(url);
+          };
+        }
+        buttons = [FilledButton(onPressed: onPressed, child: Text('Обновить'))];
       } else {
         title = 'У вас последняя версия';
         content = 'Обновление не требуется';
