@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
@@ -7,7 +10,7 @@ import 'package:smeta_maker/data/app_constants.dart';
 import 'package:smeta_maker/data/models/rows_model.dart';
 import 'package:smeta_maker/data/theme.dart';
 import 'package:smeta_maker/service/excel_service.dart';
-import 'package:smeta_maker/service/project_manager.dart';
+import 'package:smeta_maker/service/works_parser.dart';
 import 'package:smeta_maker/state/app_state.dart';
 import 'package:smeta_maker/ui/views/home_page.dart';
 
@@ -17,33 +20,42 @@ final ValueNotifier<Category> lastCategory = ValueNotifier(Category.complex);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  // Отключаем ограничения производительности для профильного режима
+  if (kDebugMode || kProfileMode) {
+    // Включаем более высокий FPS для профильного режима
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
+  }
 
-  try {
+  AppState appState = AppState();
+  final prefs = await SharedPreferences.getInstance();
+  if (prefs.getString(AppConstants.lastCategoryKey) == null) {
+    await prefs.setString(AppConstants.lastCategoryKey, Category.complex.name);
+  }
+  final file = await rootBundle.loadString('assets/db/works.txt');
+  final parsed = await compute(WorksParser.parse, file);
+  appState.initParsedRows(parsed);
+  if (Platform.isAndroid || Platform.isIOS) {
     await FlutterDownloader.initialize(debug: true);
-    final prefs = await SharedPreferences.getInstance();
-    await ProjectManager.create();
-    if (prefs.getString(AppConstants.lastCategoryKey) == null) {
-      await prefs.setString(
-        AppConstants.lastCategoryKey,
-        Category.complex.name,
-      );
-    }
-
-    runApp(MyApp());
+  }
+  try {
+    runApp(MyApp(appState));
   } catch (e) {
-    // Handle initialization errors
     print('Failed to initialize app: $e');
     runApp(ErrorApp(e.toString()));
   }
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
+  const MyApp(this.mainAppState, {super.key});
+  final AppState mainAppState;
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider<AppState>(
-      create: (_) => AppState(),
+      create: (_) => mainAppState,
       child: Consumer<AppState>(
         builder: (context, appState, _) => Shortcuts(
           shortcuts: {
@@ -53,9 +65,8 @@ class MyApp extends StatelessWidget {
           child: Actions(
             actions: {
               SaveIntent: CallbackAction<SaveIntent>(
-                onInvoke: (intent) => appState.rows.length > 0
-                    ? intent.save(appState.rows, appState.settings.name)
-                    : null,
+                onInvoke: (intent) =>
+                    appState.rows.length > 0 ? intent.save(appState) : null,
               ),
             },
             child: MaterialApp(
@@ -63,6 +74,16 @@ class MyApp extends StatelessWidget {
               navigatorKey: navigatorKey,
               theme: AppTheme.dark,
               debugShowCheckedModeBanner: false,
+              // Настройки для повышения производительности
+              builder: (context, child) {
+                return MediaQuery(
+                  data: MediaQuery.of(context).copyWith(
+                    // Отключаем ограничение FPS
+                    disableAnimations: false,
+                  ),
+                  child: child!,
+                );
+              },
               home: const HomePage(),
             ),
           ),

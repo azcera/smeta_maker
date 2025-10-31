@@ -9,7 +9,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:smeta_maker/data/app_constants.dart';
 
-class UpdateService {
+abstract class UpdateService {
   static Future<Map<String, dynamic>?> checkForUpdates() async {
     final url = Uri.parse(AppConstants.latestReleaseUrl);
     final response = await http.get(url);
@@ -18,10 +18,9 @@ class UpdateService {
       final data = jsonDecode(response.body);
       final latestTag = data['tag_name'];
 
-      final packageInfo = await PackageInfo.fromPlatform();
-      final currentVersion = 'v${packageInfo.version}';
+      final package = await PackageInfo.fromPlatform();
 
-      final isUpdateAvailable = _isVersionNewer(latestTag, currentVersion);
+      final isUpdateAvailable = _isVersionNewer(latestTag, package.version);
       return {
         AppConstants.updateAvailableKey: isUpdateAvailable,
         AppConstants.latestVersionKey: latestTag,
@@ -73,13 +72,13 @@ class UpdateService {
     final dir = await getExternalStorageDirectory();
     final savePath = '${dir!.path}/update.apk';
 
-    final taskId = await FlutterDownloader.enqueue(
-      url: url,
-      savedDir: dir.path,
-      fileName: 'update.apk',
-      showNotification: true,
-      openFileFromNotification: false,
-    );
+    // final taskId = await FlutterDownloader.enqueue(
+    //   url: url,
+    //   savedDir: dir.path,
+    //   fileName: 'update.apk',
+    //   showNotification: true,
+    //   openFileFromNotification: false,
+    // );
 
     FlutterDownloader.registerCallback((id, status, progress) async {
       if (status == DownloadTaskStatus.complete) {

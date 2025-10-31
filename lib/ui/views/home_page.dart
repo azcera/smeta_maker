@@ -24,15 +24,24 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    AppState appState = Provider.of<AppState>(context, listen: true);
+
+    if (appState.needToScroll) {
+      _pageScrollController.scrollToBottom();
+      appState.switchNeedToScroll();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) => Consumer<AppState>(
     builder: (context, appState, child) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _pageScrollController.scrollToBottom();
-      });
       double horizontalPadding =
           MediaQuery.of(context).size.width > AppConstants.maxWidth
           ? MediaQuery.of(context).size.width / 6
-          : 16;
+          : 10;
       return Scaffold(
         body: Center(
           child: Stack(
@@ -46,18 +55,19 @@ class _HomePageState extends State<HomePage> {
                       padding: EdgeInsets.only(
                         right: horizontalPadding,
                         left: horizontalPadding,
-                        bottom: 150,
+                        bottom: AppConstants.spacing*10,
                       ),
+
                       scrollController: _pageScrollController,
                       itemCount: appState.rows.length,
                       itemBuilder: (context, index) {
                         final item = appState.rows[index];
                         final ValueKey key = ValueKey('$index$item');
-                        return ReorderableDragStartListener(
+                        return ReorderableDelayedDragStartListener(
                           index: index,
                           key: key,
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 15),
+                            padding: const EdgeInsets.symmetric(vertical: AppConstants.spacing),
                             child: ElementWidget(row: item, index: index),
                           ),
                         );

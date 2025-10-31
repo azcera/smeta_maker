@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smeta_maker/data/app_constants.dart';
 import 'package:smeta_maker/data/theme.dart';
 
 abstract class Options {
@@ -24,7 +25,7 @@ abstract class Options {
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   vertical: 10,
-                  horizontal: 16,
+                  horizontal: AppConstants.defaultPadding,
                 ),
                 child: Text(
                   option.toString(),

@@ -5,8 +5,9 @@ class SettingsElement extends StatelessWidget {
   const SettingsElement({required this.child, required this.title, super.key});
   final String title;
   final Widget child;
+
   @override
-  Column build(BuildContext context) {
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [

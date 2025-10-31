@@ -18,20 +18,20 @@ class ModalWidget extends StatefulWidget with Modal {
 
 class _ModalWidgetState extends State<ModalWidget> {
   final FocusNode _dialogFocus = FocusNode();
+  late final AppState appState;
+  late final InputController inputController = appState.inputController;
 
   @override
-  void initState() {
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    appState = context.watch<AppState>();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _dialogFocus.requestFocus();
     });
-    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final AppState appState = context.watch<AppState>();
-    final InputController inputController = appState.inputController;
-
     return ChangeNotifierProvider.value(
       value: inputController,
       child: Consumer<InputController>(

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -39,6 +40,15 @@ class _RowPageState extends State<RowPage> {
       ),
     );
     index = appState.getRowIndex(item);
+  }
+
+  @override
+  void dispose() {
+    appState.inputController.clear();
+    appState.inputController.selected = RowsModel.start(
+      appState.inputController.selected.category,
+    );
+    super.dispose();
   }
 
   @override
@@ -123,19 +133,23 @@ class _RowPageState extends State<RowPage> {
                         if (textEditingValue.text.isEmpty) {
                           return Iterable<String>.empty();
                         }
-                        return rows
-                            .map((e) => e.name)
+
+                        final List list = rows.map((e) => e.name).toList()
+                          ..addAll(appState.parsedRows.map((e) => e.name));
+                        return list
                             .where(
                               (name) => name.toLowerCase().contains(
                                 textEditingValue.text.toLowerCase(),
                               ),
                             )
-                            .toSet();
+                            .map((e) => e);
                       },
                       onSelected: (String selection) {
                         inputController.text = selection;
                         inputController.updateSelected(
-                          (e) => e.copyWith(name: selection),
+                          (e) => e = appState.parsedRows.firstWhere(
+                            (e) => e.name == selection,
+                          ),
                         );
                       },
                       fieldViewBuilder:
@@ -152,7 +166,8 @@ class _RowPageState extends State<RowPage> {
                             inputController.focusNode = focusNode;
                             focusNode.addListener(() {
                               if (focusLockEnabled.value &&
-                                  !focusNode.hasFocus) {
+                                  !focusNode.hasFocus &&
+                                  Platform.isWindows) {
                                 Future.microtask(
                                   () => focusNode.requestFocus(),
                                 );
@@ -162,8 +177,13 @@ class _RowPageState extends State<RowPage> {
                             return Form(
                               key: formKey,
                               child: TextFormField(
-                                onTapOutside: (event) =>
-                                    focusNode.requestFocus(),
+                                onTapOutside: (event) {
+                                  if (Platform.isWindows) {
+                                    focusNode.requestFocus();
+                                  } else {
+                                    focusNode.unfocus();
+                                  }
+                                },
                                 focusNode: focusNode,
                                 keyboardType: TextInputType.multiline,
                                 onChanged: (value) =>
@@ -172,7 +192,7 @@ class _RowPageState extends State<RowPage> {
                                     ),
                                 maxLines: null,
                                 autofocus: true,
-                                style: TextStyle(fontSize: 60),
+                                style: TextStyle(fontSize: 30),
                                 controller: textEditingController,
                                 autocorrect: true,
                                 inputFormatters: [

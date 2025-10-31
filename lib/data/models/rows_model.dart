@@ -5,11 +5,18 @@ enum Category {
   complex('комплекс', AppColors.complex),
   quadMeters('м²', AppColors.quadMeters),
   sht('шт', AppColors.sht),
+  cubeMeters('м³', AppColors.cubeMeters),
   meters('м/п', AppColors.meters);
 
   final String name;
   final Color color;
   const Category(this.name, this.color);
+
+  static Category getCategoryFromName(String? name) {
+    return Category.values.firstWhere(
+                  (e) => e.name == name,
+                  orElse: () => Category.cubeMeters);
+  }
 }
 
 class RowsModel {
@@ -26,7 +33,11 @@ class RowsModel {
     required this.price,
   });
 
-  static RowsModel start (Category lastCategory) => RowsModel(name: '', category: lastCategory, count: 1, price: 0);
+  static RowsModel start(Category lastCategory) =>
+      RowsModel(name: '', category: lastCategory, count: 1, price: 0);
+
+  static RowsModel blank({required String name, required Category category, required double price}) =>
+      RowsModel(name: name, category: category, count: 1, price: price);
 
   RowsModel copyWith({
     String? name,

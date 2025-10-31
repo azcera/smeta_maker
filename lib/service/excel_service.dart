@@ -1,9 +1,10 @@
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:excel/excel.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:smeta_maker/data/app_constants.dart';
@@ -13,8 +14,7 @@ import 'package:smeta_maker/state/app_state.dart';
 import 'package:syncfusion_flutter_xlsio/xlsio.dart';
 
 class SaveIntent extends Intent {
-  void save(List<RowsModel> rows, String fileName) =>
-      ExcelService.saveAsFile(rows, fileName);
+  void save(AppState appState) => ExcelService.saveAsFile(appState);
 }
 
 abstract class ExcelService {
@@ -178,33 +178,39 @@ abstract class ExcelService {
     return workbook;
   }
 
-  static Future<void> saveAsFile(List<RowsModel> rows, String fileName) async {
+  static Future<void> saveAsFile(AppState appState) async {
     try {
-      final workbook = await _generateDocument(rows, fileName);
+      String fileName = appState.settings.name;
+      final workbook = await _generateDocument(appState.rows, fileName);
       final List<int> bytes = workbook.saveAsStream();
       workbook.dispose();
-      String? outputPath;
-      if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
+      late File file;
+
+      if (Platform.isAndroid || Platform.isIOS) {
+        final tempDir = await getTemporaryDirectory();
+        file = File('${tempDir.path}/$fileName.xlsx');
+        await SharePlus.instance.share(ShareParams(files: [XFile(file.path)]));
+      } else {
         String? directoryPath = await FilePicker.platform.saveFile(
           type: FileType.custom,
-          allowedExtensions: [AppConstants.excelExtension],
-          fileName: '$fileName.${AppConstants.excelExtension}',
+          bytes: Uint8List.fromList(bytes),
+          allowedExtensions: [AppConstants.excelExtension.replaceAll('.', '')],
+          fileName: '$fileName${AppConstants.excelExtension}',
           dialogTitle: 'Выберите папку для сохранения файла',
         );
         if (directoryPath == null) return;
-        outputPath = directoryPath.contains('.${AppConstants.excelExtension}')
+        directoryPath = directoryPath.contains(AppConstants.excelExtension)
             ? directoryPath
-            : '$directoryPath.${AppConstants.excelExtension}';
-      } else if (Platform.isAndroid || Platform.isIOS) {
-        final dir = await getApplicationDocumentsDirectory();
-        outputPath = '$dir/$fileName.${AppConstants.excelExtension}';
+            : '$directoryPath${AppConstants.excelExtension}';
+
+        file = File(directoryPath);
       }
-      final file = File(outputPath!);
+
       await file.writeAsBytes(bytes, flush: true);
-      if (!Platform.isWindows) {
-        await SharePlus.instance.share(ShareParams(files: [XFile(file.path)]));
-      }
-      ProjectManager.saveProject(fileName, rows);
+      ProjectManager.saveProject(
+        basename(file.path).replaceAll(RegExp(r'\.\w*'), ''),
+        appState,
+      );
     } catch (e) {
       print('${AppConstants.saveError}: $e');
     }
@@ -218,13 +224,13 @@ abstract class ExcelService {
     } else {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
-        allowedExtensions: ['xlsx'],
+        allowedExtensions: [AppConstants.excelExtension.replaceAll('.', '')],
       );
       if (result == null) return null;
       file = XFile(result.files.single.path!);
     }
     bytes = await file.readAsBytes();
-    final excel = Excel.decodeBytes(bytes);
+    final excel = await compute(Excel.decodeBytes, bytes);
 
     final sheetName = excel.tables.keys.first;
     var sheet = excel.tables[sheetName]!;
@@ -245,10 +251,9 @@ abstract class ExcelService {
           name: row[1]?.value?.toString() ?? '',
           category: row[2]?.value?.toString() == 'м2'
               ? Category.quadMeters
-              : Category.values.firstWhere(
-                  (e) => e.name == row[2]?.value?.toString(),
-                  orElse: () => Category.quadMeters,
-                ),
+              : row[2]?.value?.toString() == 'м3'
+              ? Category.cubeMeters
+              : Category.getCategoryFromName(row[2]?.value?.toString()),
           count: double.tryParse(row[3]?.value?.toString() ?? '0') ?? 1,
           price: double.tryParse(row[4]?.value?.toString() ?? '0') ?? 0,
         ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:smeta_maker/data/app_constants.dart';
 import 'package:smeta_maker/data/extensions.dart';
 import 'package:smeta_maker/data/models/rows_model.dart';
 import 'package:smeta_maker/data/router.dart';
@@ -10,11 +11,7 @@ import 'package:smeta_maker/ui/widgets/tag_widget.dart';
 /// Optimized element widget with selective rebuilds
 /// Uses const constructor and memoization for better performance
 class ElementWidget extends StatelessWidget {
-  const ElementWidget({
-    super.key,
-    required this.row,
-    required this.index,
-  });
+  const ElementWidget({super.key, required this.row, required this.index});
 
   final RowsModel row;
   final int index;
@@ -64,12 +61,12 @@ class _ElementContent extends StatelessWidget {
           Container(
             decoration: BoxDecoration(
               color: row.category.color.withValues(alpha: .5),
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: AppBorderRadius.all,
             ),
             child: Padding(
-              padding: const EdgeInsets.all(10).add(
-                const EdgeInsets.only(bottom: 5),
-              ),
+              padding: const EdgeInsets.all(
+                10,
+              ).add(const EdgeInsets.only(bottom: 5)),
               child: Text(
                 row.name,
                 style: textTheme.bodyLarge,
@@ -80,8 +77,10 @@ class _ElementContent extends StatelessWidget {
           Transform.translate(
             offset: const Offset(0, -5),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 15),
-              child: Row(spacing: 15, children: widgets),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppConstants.spacing,
+              ),
+              child: Row(spacing: AppConstants.spacing, children: widgets),
             ),
           ),
         ],
@@ -98,11 +97,7 @@ class _ElementContent extends StatelessWidget {
         ? 'Итого: ${row.calcPrice.toPrice()}'
         : row.price.toPrice();
 
-    return [
-      countText,
-      row.category.name,
-      '$priceText ₽',
-    ];
+    return [countText, row.category.name, '$priceText ₽'];
   }
 
   List<Widget> _buildTagWidgets(List<String> values) {
@@ -124,10 +119,7 @@ class _ElementContent extends StatelessWidget {
 
     return filteredValues.map((entry) {
       return Expanded(
-        child: TagWidget(
-          color: row.category.color,
-          text: entry.value,
-        ),
+        child: TagWidget(color: row.category.color, text: entry.value),
       );
     }).toList();
   }

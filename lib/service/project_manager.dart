@@ -1,15 +1,54 @@
 import 'dart:io';
 
 import 'package:excel/excel.dart';
+import 'package:flutter/foundation.dart' hide Category;
 import 'package:path_provider/path_provider.dart';
 import 'package:smeta_maker/data/app_constants.dart';
 import 'package:smeta_maker/data/models/rows_model.dart';
+import 'package:smeta_maker/state/app_state.dart';
 import 'package:syncfusion_flutter_xlsio/xlsio.dart';
 
-class ProjectManager {
-  static late final Directory _projectsDir;
+List<RowsModel> _loadProjectIsolate(Map<String, dynamic> args) {
+  final name = args['name'] as String;
+  final path = args['path'] as String;
 
-  Directory get projectsDir => _projectsDir;
+  final file = File('$path/$name.smeta');
+  final bytes = file.readAsBytesSync();
+  final excel = Excel.decodeBytes(bytes);
+  final sheetName = excel.tables.keys.first;
+  final sheet = excel.tables[sheetName]!;
+
+  final rows = <RowsModel>[];
+
+  for (int i = 0; i < sheet.maxRows; i++) {
+    final row = sheet.rows[i];
+    if (row.length < 4) continue;
+
+    try {
+      final rowModel = RowsModel(
+        name: row[0]?.value.toString() ?? '',
+        category: Category.values.firstWhere(
+          (e) => e.name == row[1]?.value.toString(),
+          orElse: () => Category.complex,
+        ),
+        count:
+            double.tryParse(row[2]?.value.toString() ?? '0') ??
+            AppConstants.defaultCount,
+        price:
+            double.tryParse(row[3]?.value.toString() ?? '0') ??
+            AppConstants.defaultPrice,
+      );
+      rows.add(rowModel);
+    } catch (_) {
+      continue;
+    }
+  }
+
+  return rows;
+}
+
+abstract class ProjectManager {
+  static Directory? _projectsDir;
 
   static Future<Directory> create() async {
     final appDir = await _getAppDir();
@@ -34,43 +73,60 @@ class ProjectManager {
     return await getTemporaryDirectory();
   }
 
-  static Future<void> saveProject(String name, List<RowsModel> rows) async {
-    final workbook = Workbook();
-    final sheet = workbook.worksheets[0];
-    final fileName = name.trim();
-
-    // Add data rows
-    for (int i = 0; i < rows.length; i++) {
-      final row = rows[i];
-      final rowData = [row.name, row.category.name, row.count, row.price];
-
-      for (int j = 0; j < rowData.length; j++) {
-        final cell = sheet.getRangeByIndex(i + 2, j + 1);
-        cell.setValue(rowData[j]);
-      }
+  static Future<void> saveProject(String name, AppState appState) async {
+    if (_projectsDir == null) {
+      await create();
     }
+    try {
+      final workbook = Workbook();
+      final sheet = workbook.worksheets[0];
+      final fileName = name.trim();
 
-    final bytes = workbook.saveAsStream();
-    workbook.dispose();
+      // Add data rows
+      for (int i = 0; i < appState.rowCount; i++) {
+        final row = appState.rows[i];
+        final rowData = [row.name, row.category.name, row.count, row.price];
 
-    final file = File('${_projectsDir.path}/$fileName.smeta');
-    await file.writeAsBytes(bytes, flush: true);
+        for (int j = 0; j < rowData.length; j++) {
+          final cell = sheet.getRangeByIndex(i + 1, j + 1);
+          cell.setValue(rowData[j]);
+        }
+      }
+
+      final bytes = workbook.saveAsStream();
+      workbook.dispose();
+
+      final file = File('${_projectsDir!.path}/$fileName.smeta');
+      await file.writeAsBytes(bytes, flush: true);
+      appState.getProjectsList();
+    } catch (e) {
+      print('Ошибка при сохранении проекта: $e');
+    }
   }
 
-  static List<String> getProjectsList() {
-    final files = _projectsDir
+  static Future<List<String>> getProjectsList() async {
+    if (_projectsDir == null) {
+      await create();
+    }
+
+    final files = _projectsDir!
         .listSync()
         .whereType<File>()
-        .where((f) => f.path.endsWith('.smeta'))
+        .where((f) => f.path.endsWith(AppConstants.projectExtension))
         .toList();
 
     return files
-        .map((f) => f.uri.pathSegments.last.replaceAll('.smeta', ''))
+        .map(
+          (f) => f.uri.pathSegments.last.replaceAll(
+            AppConstants.projectExtension,
+            '',
+          ),
+        )
         .toList();
   }
 
   static Future<List<RowsModel>> loadProject(String name) async {
-    final file = _getProjectFile(name);
+    final file = await _getProjectFile(name);
     final bytes = await file.readAsBytes();
     final excel = Excel.decodeBytes(bytes);
     final sheetName = excel.tables.keys.first;
@@ -102,27 +158,33 @@ class ProjectManager {
       }
     }
 
-    return rows;
+    return await compute(_loadProjectIsolate, {
+      'name': name,
+      'path': _projectsDir!.path,
+    });
   }
 
   static Future<void> deleteProject(String name) async {
-    final file = _getProjectFile(name);
+    final file = await _getProjectFile(name);
 
     if (await file.exists()) {
       await file.delete();
     }
   }
 
-  static Future<bool> projectExists(String name) async {
-    try {
-      final file = _getProjectFile(name);
-      return await file.exists();
-    } catch (e) {
-      return false;
-    }
-  }
+  // static Future<bool> projectExists(String name) async {
+  //   try {
+  //     final file = await _getProjectFile(name);
+  //     return await file.exists();
+  //   } catch (e) {
+  //     return false;
+  //   }
+  // }
 
-  static File _getProjectFile(String name) {
-    return File('${_projectsDir.path}/$name.smeta');
+  static Future<File> _getProjectFile(String name) async {
+    if (_projectsDir == null) {
+      await create();
+    }
+    return File('${_projectsDir!.path}/$name.smeta');
   }
 }

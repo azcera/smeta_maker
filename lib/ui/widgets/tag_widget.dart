@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smeta_maker/data/app_constants.dart';
 
 class TagWidget extends StatelessWidget {
   const TagWidget({required this.color, required this.text, super.key});
@@ -8,7 +9,7 @@ class TagWidget extends StatelessWidget {
   Widget build(BuildContext context) => DecoratedBox(
     decoration: BoxDecoration(
       color: color,
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: AppBorderRadius.all,
     ),
     child: Padding(
       padding: EdgeInsets.symmetric(vertical: 3, horizontal: 10),

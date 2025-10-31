@@ -8,6 +8,7 @@ abstract class AppColors {
       sht = Color(0xFF615A34),
       meters = Color(0xFF423461),
       quadMeters = Color(0xFF613435),
+      cubeMeters = Color(0x345761),
       delete = Color(0xFFAA1E1E),
       mainButton = Color(0xFF6B6B6B),
       secondButton = Color(0xFF505050),
@@ -16,35 +17,31 @@ abstract class AppColors {
 
 abstract class AppTheme {
   static final ButtonStyle dropdownStyle = ButtonStyle(
-    padding: WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: 20)),
+    padding: WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: 18)),
     shape: WidgetStatePropertyAll(
-      RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(15)),
+      RoundedRectangleBorder(borderRadius: AppBorderRadius.all),
     ),
     side: WidgetStatePropertyAll(BorderSide(color: Colors.white, width: .5)),
     iconColor: WidgetStateColor.resolveWith((states) => Colors.white),
-    textStyle: WidgetStateProperty.resolveWith(
-      (states) => TextStyle(
-        color: AppColors.text,
-        fontFamily: 'PlusJakartaSans',
-        fontSize: 20,
-      ),
-    ),
+    textStyle: WidgetStateProperty.resolveWith((states) => _button),
   );
   static final TextStyle _button = TextStyle(
         fontFamily: 'PlusJakartaSans',
-        fontSize: 20,
+        fontSize: 18,
         color: AppColors.text,
       ),
       _body = TextStyle(
         fontFamily: 'PlusJakartaSans',
         color: AppColors.text,
-        fontSize: 14,
+        fontSize: 12,
         fontWeight: FontWeight.w500,
       );
 
   static ThemeData dark = ThemeData(
     fontFamily: 'PlusJakartaSans',
     brightness: Brightness.dark,
+    // Оптимизации для производительности
+    useMaterial3: true,
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: Colors.transparent,
     ),
@@ -57,7 +54,7 @@ abstract class AppTheme {
         fontFamily: 'PlusJakartaSans',
         fontWeight: FontWeight.w500,
         color: AppColors.text,
-        fontSize: 18,
+        fontSize: 16,
         height: 1.1,
       ),
     ),
@@ -80,6 +77,8 @@ abstract class AppTheme {
             ? AppColors.totalShow
             : AppColors.mainButton,
       ),
+      // Оптимизация анимации Switch
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     ),
     dropdownMenuTheme: DropdownMenuThemeData(
       textStyle: TextStyle(fontFamily: 'PlusJakartaSans'),
@@ -96,6 +95,8 @@ abstract class AppTheme {
         foregroundColor: AppColors.text,
         padding: EdgeInsets.all(18),
         shape: RoundedRectangleBorder(borderRadius: AppBorderRadius.all),
+        // Оптимизация анимации кнопок
+        animationDuration: Duration(milliseconds: 150),
       ),
     ),
   );

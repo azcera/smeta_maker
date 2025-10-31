@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:smeta_maker/data/app_constants.dart';
 import 'package:smeta_maker/data/theme.dart';
 
 class PressableIconWidget extends StatelessWidget {
@@ -10,15 +11,15 @@ class PressableIconWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Material(
     color: Colors.transparent,
-    borderRadius: BorderRadius.circular(14),
+    borderRadius: AppBorderRadius.all,
     child: InkWell(
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: AppBorderRadius.all,
       onTap: onTap,
       enableFeedback: true,
       child: AspectRatio(
         aspectRatio: 1,
         child: Container(
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(14)),
+          decoration: BoxDecoration(borderRadius: AppBorderRadius.all),
           child: Icon(icon, color: AppColors.text),
         ),
       ),

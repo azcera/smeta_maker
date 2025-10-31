@@ -93,7 +93,7 @@ class _RowBottomWidgetState extends State<RowBottomWidget> {
                                       ),
                                     ),
                                   ),
-                                  SizedBox(width: 15),
+                                  SizedBox(width: AppConstants.spacing),
                                 ],
                               ),
                             )
@@ -108,7 +108,7 @@ class _RowBottomWidgetState extends State<RowBottomWidget> {
                           ),
                         ),
                       ),
-                      SizedBox(width: 15),
+                      SizedBox(width: AppConstants.spacing),
                       Expanded(
                         child: GestureDetector(
                           onTap: () {
@@ -137,13 +137,16 @@ class _RowBottomWidgetState extends State<RowBottomWidget> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 15),
+                  SizedBox(height: AppConstants.spacing),
                   FilledButton(
-                    onPressed: inputController.selected.name.isEmpty
+                    onPressed:
+                        widget.row == null &&
+                            inputController.selected.name.isEmpty
                         ? AppRouter.pop
                         : widget.submitEdit,
                     child: Text(
-                      inputController.selected.name.isEmpty
+                      widget.row == null &&
+                              inputController.selected.name.isEmpty
                           ? 'Назад'
                           : 'Сохранить',
                     ),

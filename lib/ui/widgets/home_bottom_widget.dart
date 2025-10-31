@@ -17,8 +17,9 @@ class HomeBottomWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     AppState appState = context.read<AppState>();
 
-    void save() async =>
-        await ExcelService.saveAsFile(appState.rows, appState.settings.name);
+    void save() async => await ExcelService.saveAsFile(
+      appState
+    );
 
     return Align(
       alignment: AlignmentGeometry.bottomCenter,
@@ -46,7 +47,7 @@ class HomeBottomWidget extends StatelessWidget {
               SizedBox(height: 7),
               IntrinsicHeight(
                 child: Row(
-                  spacing: 15,
+                  spacing: AppConstants.spacing,
                   children: [
                     PressableIconWidget(
                       Icons.delete,
@@ -83,10 +84,12 @@ class HomeBottomWidget extends StatelessWidget {
                         onPressed: () => appState.rows.isNotEmpty
                             ? save()
                             : AppRouter.push(RowPage()),
-                        child: Text(
-                          appState.rows.isNotEmpty
-                              ? 'Сохранить'
-                              : 'Заполните поля',
+                        child: FittedBox(
+                          child: Text(
+                            appState.rows.isNotEmpty
+                                ? 'Сохранить'
+                                : 'Заполните поля',
+                          ),
                         ),
                       ),
                     ),
