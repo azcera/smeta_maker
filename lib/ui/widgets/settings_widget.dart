@@ -1,3 +1,4 @@
+import 'package:auto_size_text_field/auto_size_text_field.dart';
 import 'package:basic_dropdown_button/basic_dropdown_button.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
@@ -16,22 +17,8 @@ class SettingsWidget extends StatefulWidget {
 }
 
 class _SettingsWidgetState extends State<SettingsWidget> {
-  //late PackageInfo packageInfo;
-  //List<String> projects = [];
   String? selectedValue;
-
-  // init() async {
-  //   packageInfo = await PackageInfo.fromPlatform();
-  //   projects = await ProjectManager.getProjectsList();
-  // }
-
   Key dropDownKey = Key('DropDownMenu');
-
-  @override
-  void initState() {
-    // init();
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,11 +28,9 @@ class _SettingsWidgetState extends State<SettingsWidget> {
           appState.initRows(await ProjectManager.loadProject(name));
           appState.updateSettingsName(name);
         }
-
         return Center(
           child: ListView.builder(
-            // Используем ListView.builder для лучшей производительности
-            itemCount: 6, // Количество элементов настроек
+            itemCount: 6,
             padding: EdgeInsets.symmetric(
               horizontal:
                   MediaQuery.of(context).size.width > AppConstants.maxWidth
@@ -85,11 +70,13 @@ class _SettingsWidgetState extends State<SettingsWidget> {
         ),
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 20),
-          child: TextField(
+          child: AutoSizeTextField(
             controller: appState.nameController,
-            style: TextStyle(decorationStyle: TextDecorationStyle.wavy),
+            maxLines: 1,
             onChanged: (text) => appState.updateSettingsName(text),
+            minFontSize: 8,
             textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 18),
             decoration: InputDecoration(
               hintText: 'Введите название объекта',
               border: InputBorder.none,
@@ -105,7 +92,7 @@ class _SettingsWidgetState extends State<SettingsWidget> {
     return SettingsElement(
       child: FilledButton(
         onPressed: () => appState.clearRows(),
-        child: Text('Очистить строки'),
+        child: FittedBox(child: Text('Очистить строки')),
       ),
       title: 'Количество строк: ${appState.rows.length}',
     );
@@ -120,7 +107,7 @@ class _SettingsWidgetState extends State<SettingsWidget> {
             appState.updateUploadedFile(file);
           }
         },
-        child: Text('Загрузить таблицу'),
+        child: FittedBox(child: Text('Загрузить таблицу')),
       ),
       title:
           'Загруженная таблица: ${appState.settings.uploadedFile?.name ?? 'нет'}',
@@ -153,7 +140,7 @@ class _SettingsWidgetState extends State<SettingsWidget> {
     return SettingsElement(
       child: FilledButton(
         onPressed: () => appState.checkupdates(),
-        child: Text('Проверить обновления'),
+        child: FittedBox(child: Text('Проверить обновления')),
       ),
       title: 'Текущая версия: ${appState.version}',
     );
@@ -204,15 +191,21 @@ class _SettingsWidgetState extends State<SettingsWidget> {
           menuBackgroundColor: AppColors.secondButton,
           buttonIconFirst: false,
           buttonIconSpace: 10,
-          buttonTextStyle: TextStyle(
-            fontFamily: 'PlusJakartaSans',
-            color: Colors.white,
+          buttonText: '',
+          buttonChild: FittedBox(
+            child: Text(
+              selectedValue == null
+                  ? appState.projects.isEmpty
+                        ? 'Нет проектов'
+                        : 'Выберите проект'
+                  : selectedValue!,
+              style: TextStyle(
+                fontFamily: 'PlusJakartaSans',
+                color: Colors.white,
+              ),
+            ),
           ),
-          buttonText: selectedValue == null
-              ? appState.projects.isEmpty
-                    ? 'Нет проектов'
-                    : 'Выберите проект'
-              : selectedValue,
+
           buttonIcon: ({required showedMenu}) => appState.projects.isEmpty
               ? SizedBox.shrink()
               : !showedMenu

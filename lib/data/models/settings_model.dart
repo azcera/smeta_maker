@@ -27,23 +27,4 @@ class SettingsModel {
       isTotalsShown: isTotalsShown ?? this.isTotalsShown,
     );
   }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is SettingsModel &&
-        other.name == name &&
-        other.uploadedFile == uploadedFile &&
-        other.isTotalsShown == isTotalsShown;
-  }
-
-  @override
-  int get hashCode {
-    return Object.hash(name, uploadedFile, isTotalsShown);
-  }
-
-  @override
-  String toString() {
-    return 'SettingsModel(name: $name, uploadedFile: $uploadedFile, isTotalsShown: $isTotalsShown)';
-  }
 }

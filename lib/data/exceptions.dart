@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Custom exceptions for better error handling and debugging
 class SmetaException implements Exception {
   final String message;
   final String? code;
@@ -17,7 +16,6 @@ class SmetaException implements Exception {
   }
 }
 
-/// Specific exceptions for different operations
 class FileOperationException extends SmetaException {
   const FileOperationException(
     super.message, {
@@ -34,9 +32,7 @@ class NetworkException extends SmetaException {
   const NetworkException(super.message, {super.code, super.originalError});
 }
 
-/// Error handling utilities
 class ErrorHandler {
-  /// Logs error and returns user-friendly message
   static String handleError(dynamic error, {String? fallbackMessage}) {
     String message = fallbackMessage ?? 'Произошла неизвестная ошибка';
 
@@ -45,14 +41,11 @@ class ErrorHandler {
     } else if (error is Exception) {
       message = error.toString();
     }
-
-    // Log error for debugging
     print('Error: $error');
 
     return message;
   }
 
-  /// Shows error dialog to user
   static void showErrorDialog(BuildContext context, String message) {
     showDialog(
       context: context,

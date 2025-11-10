@@ -55,7 +55,7 @@ class _HomePageState extends State<HomePage> {
                       padding: EdgeInsets.only(
                         right: horizontalPadding,
                         left: horizontalPadding,
-                        bottom: AppConstants.spacing*10,
+                        bottom: AppConstants.spacing * 10,
                       ),
 
                       scrollController: _pageScrollController,
@@ -67,7 +67,9 @@ class _HomePageState extends State<HomePage> {
                           index: index,
                           key: key,
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: AppConstants.spacing),
+                            padding: const EdgeInsets.symmetric(
+                              vertical: AppConstants.spacing,
+                            ),
                             child: ElementWidget(row: item, index: index),
                           ),
                         );

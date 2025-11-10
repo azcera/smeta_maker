@@ -172,15 +172,6 @@ abstract class ProjectManager {
     }
   }
 
-  // static Future<bool> projectExists(String name) async {
-  //   try {
-  //     final file = await _getProjectFile(name);
-  //     return await file.exists();
-  //   } catch (e) {
-  //     return false;
-  //   }
-  // }
-
   static Future<File> _getProjectFile(String name) async {
     if (_projectsDir == null) {
       await create();
