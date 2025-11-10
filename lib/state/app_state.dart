@@ -49,7 +49,6 @@ class AppState extends ChangeNotifier {
   List<RowsModel> _parsedRows = [];
   List<String> _projects = [];
 
-
   List<RowsModel> get parsedRows => _parsedRows;
 
   void initParsedRows(List<RowsModel> rows) {
@@ -66,7 +65,6 @@ class AppState extends ChangeNotifier {
     isTotalsShown: false,
   );
 
-  // Settings controller for text input
   TextEditingController? _nameController;
   InputController inputController = InputController();
 
@@ -84,15 +82,12 @@ class AppState extends ChangeNotifier {
   bool get needToScroll => _needToScroll;
   void switchNeedToScroll() => _needToScroll = !_needToScroll;
 
-  // Getters
   List<RowsModel> get rows => _rows;
   SettingsModel get settings => _settings;
 
-  // Computed properties
   String get totalPrice => _getTotalPrice(_rows);
   int get rowCount => _rows.length;
 
-  // Row operations
   void addRow(RowsModel row) {
     _rows = [..._rows, row];
     _needToScroll = true;
@@ -137,7 +132,6 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Settings operations
   void updateSettings(SettingsModel newSettings) {
     if (_settings != newSettings) {
       _settings = newSettings;
@@ -217,7 +211,6 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  // Helper methods
   String _getTotalPrice(List<RowsModel> rows) {
     return rows.fold<double>(0, (sum, row) => sum + row.calcPrice).toPrice();
   }

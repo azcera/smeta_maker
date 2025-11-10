@@ -28,6 +28,7 @@ class RowBottomWidget extends StatefulWidget {
 }
 
 class _RowBottomWidgetState extends State<RowBottomWidget> {
+  bool isTap = true;
   @override
   Widget build(BuildContext context) {
     final AppState appState = context.watch<AppState>();
@@ -101,7 +102,7 @@ class _RowBottomWidgetState extends State<RowBottomWidget> {
                       Expanded(
                         child: GestureDetector(
                           onTap: inputController.switchCategory,
-
+                          onLongPress: inputController.switchCategory,
                           child: TagWidget(
                             color: AppColors.secondButton,
                             text: inputController.selected.category.name,

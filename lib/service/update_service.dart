@@ -72,14 +72,6 @@ abstract class UpdateService {
     final dir = await getExternalStorageDirectory();
     final savePath = '${dir!.path}/update.apk';
 
-    // final taskId = await FlutterDownloader.enqueue(
-    //   url: url,
-    //   savedDir: dir.path,
-    //   fileName: 'update.apk',
-    //   showNotification: true,
-    //   openFileFromNotification: false,
-    // );
-
     FlutterDownloader.registerCallback((id, status, progress) async {
       if (status == DownloadTaskStatus.complete) {
         print('Загрузка завершена');

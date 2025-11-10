@@ -14,8 +14,9 @@ enum Category {
 
   static Category getCategoryFromName(String? name) {
     return Category.values.firstWhere(
-                  (e) => e.name == name,
-                  orElse: () => Category.cubeMeters);
+      (e) => e.name == name,
+      orElse: () => Category.cubeMeters,
+    );
   }
 }
 
@@ -36,8 +37,11 @@ class RowsModel {
   static RowsModel start(Category lastCategory) =>
       RowsModel(name: '', category: lastCategory, count: 1, price: 0);
 
-  static RowsModel blank({required String name, required Category category, required double price}) =>
-      RowsModel(name: name, category: category, count: 1, price: price);
+  static RowsModel blank({
+    required String name,
+    required Category category,
+    required double price,
+  }) => RowsModel(name: name, category: category, count: 1, price: price);
 
   RowsModel copyWith({
     String? name,
@@ -55,25 +59,5 @@ class RowsModel {
 
   List<dynamic> toExcelRow(int index) {
     return [index, name, category.name, count, price, calcPrice];
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is RowsModel &&
-        other.name == name &&
-        other.price == price &&
-        other.category == category &&
-        other.count == count;
-  }
-
-  @override
-  int get hashCode {
-    return Object.hash(name, price, category, count);
-  }
-
-  @override
-  String toString() {
-    return 'RowsModel(name: $name, category: $category, count: $count, price: $price)';
   }
 }

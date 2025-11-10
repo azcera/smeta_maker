@@ -8,7 +8,7 @@ abstract class AppColors {
       sht = Color(0xFF615A34),
       meters = Color(0xFF423461),
       quadMeters = Color(0xFF613435),
-      cubeMeters = Color(0x345761),
+      cubeMeters = Color(0xFF345761),
       delete = Color(0xFFAA1E1E),
       mainButton = Color(0xFF6B6B6B),
       secondButton = Color(0xFF505050),
@@ -40,7 +40,6 @@ abstract class AppTheme {
   static ThemeData dark = ThemeData(
     fontFamily: 'PlusJakartaSans',
     brightness: Brightness.dark,
-    // Оптимизации для производительности
     useMaterial3: true,
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: Colors.transparent,
@@ -77,7 +76,6 @@ abstract class AppTheme {
             ? AppColors.totalShow
             : AppColors.mainButton,
       ),
-      // Оптимизация анимации Switch
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     ),
     dropdownMenuTheme: DropdownMenuThemeData(
@@ -95,7 +93,6 @@ abstract class AppTheme {
         foregroundColor: AppColors.text,
         padding: EdgeInsets.all(18),
         shape: RoundedRectangleBorder(borderRadius: AppBorderRadius.all),
-        // Оптимизация анимации кнопок
         animationDuration: Duration(milliseconds: 150),
       ),
     ),

@@ -51,7 +51,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   alignment: AlignmentGeometry.bottomCenter,
                   child: FilledButton(
                     onPressed: AppRouter.pop,
-                    child: Text('Назад'),
+                    child: FittedBox(child: Text('Назад')),
                   ),
                 ),
               ],

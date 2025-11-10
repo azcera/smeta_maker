@@ -21,9 +21,7 @@ final ValueNotifier<Category> lastCategory = ValueNotifier(Category.complex);
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  // Отключаем ограничения производительности для профильного режима
   if (kDebugMode || kProfileMode) {
-    // Включаем более высокий FPS для профильного режима
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
@@ -54,6 +52,10 @@ class MyApp extends StatelessWidget {
   final AppState mainAppState;
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    if (screenWidth < 230) {
+      return ErrorApp('Размер вашего экрана по ширине слишком маленький');
+    }
     return ChangeNotifierProvider<AppState>(
       create: (_) => mainAppState,
       child: Consumer<AppState>(
@@ -74,11 +76,9 @@ class MyApp extends StatelessWidget {
               navigatorKey: navigatorKey,
               theme: AppTheme.dark,
               debugShowCheckedModeBanner: false,
-              // Настройки для повышения производительности
               builder: (context, child) {
                 return MediaQuery(
                   data: MediaQuery.of(context).copyWith(
-                    // Отключаем ограничение FPS
                     disableAnimations: false,
                   ),
                   child: child!,
@@ -95,30 +95,32 @@ class MyApp extends StatelessWidget {
 
 class ErrorApp extends StatelessWidget {
   const ErrorApp(this.errorMessage, {super.key});
-
   final String errorMessage;
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Smeta Maker - Error',
+      debugShowCheckedModeBanner: false,
+      title: 'Ошибка',
       theme: AppTheme.dark,
       home: Scaffold(
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
-              const SizedBox(height: 16),
-              const Text(
-                'Ошибка инициализации приложения',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              Icon(Icons.error_outline, size: 64, color: Colors.red),
+              SizedBox(height: 16),
+              Center(
+                child: Text(
+                  'Ошибка инициализации приложения',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8),
               Text(
                 errorMessage,
                 textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 14),
+                style: TextStyle(fontSize: 14),
               ),
             ],
           ),

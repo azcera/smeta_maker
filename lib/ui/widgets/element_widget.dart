@@ -8,8 +8,6 @@ import 'package:smeta_maker/state/app_state.dart';
 import 'package:smeta_maker/ui/views/row_page.dart';
 import 'package:smeta_maker/ui/widgets/tag_widget.dart';
 
-/// Optimized element widget with selective rebuilds
-/// Uses const constructor and memoization for better performance
 class ElementWidget extends StatelessWidget {
   const ElementWidget({super.key, required this.row, required this.index});
 
@@ -20,7 +18,6 @@ class ElementWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<AppState>(
       builder: (context, appState, child) {
-        // Only rebuild when relevant settings change
         final settings = appState.settings;
 
         return _ElementContent(
@@ -33,7 +30,6 @@ class ElementWidget extends StatelessWidget {
   }
 }
 
-/// Separated content widget to minimize rebuilds
 class _ElementContent extends StatelessWidget {
   const _ElementContent({
     required this.row,
@@ -49,12 +45,12 @@ class _ElementContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    // Memoized values to prevent recalculation
     final values = _buildValues();
     final widgets = _buildTagWidgets(values);
 
     return GestureDetector(
       onTap: () => AppRouter.push(RowPage(row: row)),
+      onSecondaryTap: () => AppRouter.push(RowPage(row: row)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -103,13 +99,12 @@ class _ElementContent extends StatelessWidget {
   List<Widget> _buildTagWidgets(List<String> values) {
     final filteredValues = values.asMap().entries.where((entry) {
       final index = entry.key;
-
-      // Hide count for complex items or when totals are shown
-      if ((row.category == Category.complex || isTotalsShown) && index == 0) {
+      if ((row.category == Category.complex ||
+              row.count == 1 ||
+              isTotalsShown) &&
+          index == 0) {
         return false;
       }
-
-      // Hide category when totals are shown
       if (isTotalsShown && index == 1) {
         return false;
       }

@@ -17,9 +17,7 @@ class HomeBottomWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     AppState appState = context.read<AppState>();
 
-    void save() async => await ExcelService.saveAsFile(
-      appState
-    );
+    void save() async => await ExcelService.saveAsFile(appState);
 
     return Align(
       alignment: AlignmentGeometry.bottomCenter,
@@ -59,7 +57,7 @@ class HomeBottomWidget extends StatelessWidget {
                         buttons: [
                           FilledButton(
                             onPressed: AppRouter.pop,
-                            child: Text('Оставить'),
+                            child: FittedBox(child: Text('Оставить')),
                             style: FilledButton.styleFrom(
                               minimumSize: Size(0, 0),
                             ),
@@ -74,7 +72,7 @@ class HomeBottomWidget extends StatelessWidget {
                               backgroundColor: AppColors.delete,
                             ),
 
-                            child: Text('Удалить'),
+                            child: FittedBox(child: Text('Удалить')),
                           ),
                         ],
                       ).show(),

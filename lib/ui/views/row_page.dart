@@ -23,14 +23,16 @@ class RowPage extends StatefulWidget {
 class _RowPageState extends State<RowPage> {
   late AppState appState;
   late int index;
+  late TextEditingController _textEditingController;
 
   @override
   void initState() {
     super.initState();
+    _textEditingController = TextEditingController();
     appState = context.read<AppState>();
     if (widget.row == null) return;
     RowsModel item = widget.row!;
-    appState.inputController.text = item.name;
+    _textEditingController.text = item.name;
     appState.inputController.updateSelected(
       (e) => e.copyWith(
         category: item.category,
@@ -44,18 +46,18 @@ class _RowPageState extends State<RowPage> {
 
   @override
   void dispose() {
+    _textEditingController.dispose();
     appState.inputController.clear();
     appState.inputController.selected = RowsModel.start(
       appState.inputController.selected.category,
     );
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final formKey = GlobalKey<FormState>();
-    List<RowsModel> rows = appState.rows;
-
     bool canPress = true;
     DateTime _closeSubTime = DateTime.now();
     void setCloseSubTime(DateTime value) => _closeSubTime = value;
@@ -134,8 +136,9 @@ class _RowPageState extends State<RowPage> {
                           return Iterable<String>.empty();
                         }
 
-                        final List list = rows.map((e) => e.name).toList()
-                          ..addAll(appState.parsedRows.map((e) => e.name));
+                        final List list = appState.parsedRows
+                            .map((e) => e.name)
+                            .toList();
                         return list
                             .where(
                               (name) => name.toLowerCase().contains(
@@ -144,6 +147,14 @@ class _RowPageState extends State<RowPage> {
                             )
                             .map((e) => e);
                       },
+                      // onSelected: (String selection) {
+                      //   subTextEditingController.text = selection;
+                      //   inputController.updateSelected(
+                      //     (e) => appState.parsedRows.firstWhere(
+                      //       (e) => e.name == selection,
+                      //     ),
+                      //   );
+                      // },
                       onSelected: (String selection) {
                         inputController.text = selection;
                         inputController.updateSelected(
@@ -160,9 +171,27 @@ class _RowPageState extends State<RowPage> {
                             onFieldSubmitted,
                           ) {
                             WidgetsBinding.instance.addPostFrameCallback((_) {
-                              textEditingController.text =
-                                  inputController.selected.name;
+                              final text = inputController.selected.name;
+                              textEditingController.value =
+                                  textEditingController.value.copyWith(
+                                    text: text,
+                                    selection: TextSelection.collapsed(
+                                      offset: text.length,
+                                    ),
+                                    composing: TextRange.empty,
+                                  );
                             });
+                            // WidgetsBinding.instance.addPostFrameCallback((_) {
+                            //   textEditingController.text =
+                            //       subTextEditingController.text;
+                            // });
+                            final controllerToUse = _textEditingController;
+                            controllerToUse.addListener(() {
+                              appState.inputController.updateSelected(
+                                (e) => e.copyWith(name: controllerToUse.text),
+                              );
+                            });
+
                             inputController.focusNode = focusNode;
                             focusNode.addListener(() {
                               if (focusLockEnabled.value &&
@@ -186,14 +215,14 @@ class _RowPageState extends State<RowPage> {
                                 },
                                 focusNode: focusNode,
                                 keyboardType: TextInputType.multiline,
-                                onChanged: (value) =>
-                                    inputController.updateSelected(
-                                      (e) => e.copyWith(name: value),
-                                    ),
+                                // onChanged: (value) =>
+                                //     inputController.updateSelected(
+                                //       (e) => e.copyWith(name: value),
+                                //     ),
                                 maxLines: null,
                                 autofocus: true,
                                 style: TextStyle(fontSize: 30),
-                                controller: textEditingController,
+                                controller: controllerToUse,
                                 autocorrect: true,
                                 inputFormatters: [
                                   FilteringTextInputFormatter.deny(

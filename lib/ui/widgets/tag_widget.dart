@@ -6,14 +6,15 @@ class TagWidget extends StatelessWidget {
   final Color color;
   final String text;
   @override
-  Widget build(BuildContext context) => DecoratedBox(
-    decoration: BoxDecoration(
-      color: color,
-      borderRadius: AppBorderRadius.all,
-    ),
+  Widget build(BuildContext context) => Container(
+    height: 25,
+    decoration: BoxDecoration(color: color, borderRadius: AppBorderRadius.all),
     child: Padding(
       padding: EdgeInsets.symmetric(vertical: 3, horizontal: 10),
-      child: Text(text, textAlign: TextAlign.center),
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(text, textAlign: TextAlign.center),
+      ),
     ),
   );
 }
