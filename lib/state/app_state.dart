@@ -198,12 +198,14 @@ class AppState extends ChangeNotifier {
           FilledButton(onPressed: AppRouter.pop, child: Text('Закрыть')),
         ];
       }
-      AlertWidget(
-        title: title,
-        buttons: buttons,
-        onTap: () {},
-        content: content,
-      ).show(context: context);
+      if (context.mounted) {
+        AlertWidget(
+          title: title,
+          buttons: buttons,
+          onTap: () {},
+          content: content,
+        ).show(context: context);
+      }
       return result;
     } catch (e) {
       print(e);
