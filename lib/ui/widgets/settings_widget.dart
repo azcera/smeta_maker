@@ -139,7 +139,7 @@ class _SettingsWidgetState extends State<SettingsWidget> {
   Widget _buildCheckUpdatesButton(AppState appState) {
     return SettingsElement(
       child: FilledButton(
-        onPressed: () => appState.checkupdates(),
+        onPressed: () => appState.checkupdates(context),
         child: FittedBox(child: Text('Проверить обновления')),
       ),
       title: 'Текущая версия: ${appState.version}',

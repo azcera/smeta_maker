@@ -163,7 +163,7 @@ class AppState extends ChangeNotifier {
     }
   }
 
-  Future<Map<String, dynamic>?> checkupdates() async {
+  Future<Map<String, dynamic>?> checkupdates(BuildContext context) async {
     try {
       final result = await UpdateService.checkForUpdates();
       print(result);
@@ -203,7 +203,7 @@ class AppState extends ChangeNotifier {
         buttons: buttons,
         onTap: () {},
         content: content,
-      ).show();
+      ).show(context: context);
       return result;
     } catch (e) {
       print(e);

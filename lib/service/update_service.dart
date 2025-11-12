@@ -64,20 +64,34 @@ abstract class UpdateService {
 
   static Future<void> downloadAndInstallApk(String url) async {
     final status = await Permission.storage.request();
-    if (!status.isGranted) {
-      print('Нет разрешения на доступ к памяти');
+    final statusInstall = await Permission.requestInstallPackages.request();
+    if (!status.isGranted || !statusInstall.isGranted) {
+      print('Нет разрешения');
       return;
     }
 
     final dir = await getExternalStorageDirectory();
     final savePath = '${dir!.path}/update.apk';
 
+    // Регистрируем callback
     FlutterDownloader.registerCallback((id, status, progress) async {
       if (status == DownloadTaskStatus.complete) {
         print('Загрузка завершена');
         await InstallPlugin.installApk(savePath);
+      } else if (status == DownloadTaskStatus.failed) {
+        print('Загрузка не удалась');
       }
     });
+
+    final taskId = await FlutterDownloader.enqueue(
+      url: url,
+      savedDir: dir.path,
+      fileName: 'update.apk',
+      showNotification: true,
+      openFileFromNotification: false,
+    );
+
+    print('Задача загрузки поставлена: $taskId');
   }
 
   static Future<void> downloadAndRunInstaller(String url) async {
@@ -88,11 +102,14 @@ abstract class UpdateService {
     final file = File(installerPath);
     await file.writeAsBytes(response.bodyBytes);
 
+    if (!file.existsSync()) {
+      print('Ошибка: файл установщика не найден!');
+      return;
+    }
     await Process.start(installerPath, [
       '/VERYSILENT',
       '/NORESTART',
     ], mode: ProcessStartMode.detached);
-
     exit(0);
   }
 }
